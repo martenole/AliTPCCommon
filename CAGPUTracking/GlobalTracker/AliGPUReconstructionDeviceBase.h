@@ -7,7 +7,7 @@
 class AliGPUReconstructionDeviceBase : public AliGPUReconstruction
 {
 public:
-	virtual ~AliGPUReconstructionDeviceBase() override = default;
+	virtual ~AliGPUReconstructionDeviceBase() override;
 
 	char* MergerHostMemory() const {return((char*) fGPUMergerHostMemory);}
 	const AliGPUCAParam* DeviceParam() const {return mDeviceParam;}
@@ -62,6 +62,7 @@ protected:
 		TPCFastTransform* fTpcTransform = nullptr;
 		char* fTpcTransformBuffer = nullptr;
 		o2::trd::TRDGeometryFlat* fTrdGeometry = nullptr;
+		AliGPUTRDTracker* fGpuTrdTracker = nullptr;
 		void* SetPointersDeviceProcessor(void* mem);
 		void* SetPointersFlatObjects(void* mem);
 		short mMemoryResWorkers = -1;
@@ -96,6 +97,7 @@ protected:
 	AliGPUProcessorWorkers workersDevice; //tracker objects that will be used on the GPU
 	AliGPUTPCTracker* &fGpuTracker = workers.fGpuTracker;
 	AliGPUTPCGMMerger* &fGpuMerger = workers.fGpuMerger;
+	AliGPUTRDTracker* &fGpuTrdTracker = workers.fGpuTrdTracker;
 
 	int fThreadId = -1; //Thread ID that is valid for the local CUDA context
     int fDeviceId = -1; //Device ID used by backend

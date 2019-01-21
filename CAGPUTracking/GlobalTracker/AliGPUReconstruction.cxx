@@ -73,6 +73,7 @@ AliGPUReconstruction::AliGPUReconstruction(const AliGPUCASettingsProcessing& cfg
 		RegisterGPUProcessor(&mTPCSliceTrackersCPU[i]);
 	}
 	RegisterGPUProcessor(&mTPCMergerCPU);
+	RegisterGPUProcessor(mTRDTracker.get());
 }
 
 AliGPUReconstruction::~AliGPUReconstruction()
@@ -905,9 +906,12 @@ int AliGPUReconstruction::RunTRDTracking()
 		tracksTPCId.push_back(i);
 		tracksTPCLab.push_back(-1);
 	}
-	
+
 	mTRDTracker->Reset();
-	mTRDTracker->StartLoadTracklets(mIOPtrs.nTRDTracklets);
+
+	mTRDTracker->SetMaxData();
+	AllocateRegisteredMemory(mTRDTracker->MemoryTracks());
+	AllocateRegisteredMemory(mTRDTracker->MemoryTracklets());
 
 	for (unsigned int iTracklet = 0;iTracklet < mIOPtrs.nTRDTracklets;++iTracklet)
 	{
@@ -915,7 +919,12 @@ int AliGPUReconstruction::RunTRDTracking()
 		else mTRDTracker->LoadTracklet(mIOPtrs.trdTracklets[iTracklet]);
 	}
 
-	mTRDTracker->DoTracking(&(tracksTPC[0]), &(tracksTPCLab[0]), tracksTPC.size());
+	for (unsigned int iTrack = 0; iTrack < tracksTPC.size(); ++iTrack)
+	{
+		mTRDTracker->LoadTrack(tracksTPC[iTrack], tracksTPCLab[iTrack]);
+	}
+
+	mTRDTracker->DoTracking();
 	
 	printf("TRD Tracker reconstructed %d tracks\n", mTRDTracker->NTracks());
 	

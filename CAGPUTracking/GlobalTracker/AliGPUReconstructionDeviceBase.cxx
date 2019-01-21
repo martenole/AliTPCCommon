@@ -29,6 +29,12 @@ AliGPUReconstructionDeviceBase::AliGPUReconstructionDeviceBase(const AliGPUCASet
 {
 }
 
+AliGPUReconstructionDeviceBase::~AliGPUReconstructionDeviceBase()
+{
+	// make d'tor such that vtable is created for this class
+	// needed for build with AliRoot
+}
+
 #ifdef GPUCA_ENABLE_GPU_TRACKER
 
 int AliGPUReconstructionDeviceBase::GlobalTracking(int iSlice, int threadId, AliGPUReconstructionDeviceBase::helperParam* hParam)
@@ -425,6 +431,7 @@ int AliGPUReconstructionDeviceBase::InitDevice()
 		ExitDevice_Runtime();
 		return(1);
 	}
+	RegisterGPUDeviceProcessor(fGpuTrdTracker, mTRDTracker.get());
 
 	if (StartHelperThreads()) return(1);
 
@@ -471,6 +478,7 @@ void* AliGPUReconstructionDeviceBase::AliGPUProcessorWorkers::SetPointersDeviceP
 	//Don't run constructor / destructor here, this will be just local memcopy of Processors in GPU Memory
 	AliGPUReconstruction::computePointerWithAlignment(mem, fGpuTracker, NSLICES);
 	AliGPUReconstruction::computePointerWithAlignment(mem, fGpuMerger, 1);
+	AliGPUReconstruction::computePointerWithAlignment(mem, fGpuTrdTracker, 1);
 	return mem;
 }
 
